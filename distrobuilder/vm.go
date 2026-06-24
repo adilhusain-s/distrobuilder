@@ -151,6 +151,20 @@ func (v *vm) createPartitions(args ...[]string) error {
 	return nil
 }
 
+// logPartitionTable prints the GPT partition table of the VM disk image.
+func (v *vm) logPartitionTable() error {
+	var out strings.Builder
+
+	err := shared.RunCommand(v.ctx, nil, &out, "sgdisk", "-p", v.imageFile)
+	if err != nil {
+		return fmt.Errorf("Failed to print partition table: %w", err)
+	}
+
+	fmt.Print(out.String())
+
+	return nil
+}
+
 func (v *vm) lsblkLoopDevice() (func(int) (uint32, uint32, error), int, error) {
 	var out strings.Builder
 	// Ensure the partitions are accessible. This part is usually only needed

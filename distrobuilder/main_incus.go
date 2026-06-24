@@ -348,6 +348,11 @@ func (c *cmdIncus) run(cmd *cobra.Command, args []string, overlayDir string) err
 			return fmt.Errorf("Failed to create partitions: %w", err)
 		}
 
+		err = vm.logPartitionTable()
+		if err != nil {
+			return fmt.Errorf("Failed to log partition table: %w", err)
+		}
+
 		err = vm.mountImage()
 		if err != nil {
 			return fmt.Errorf("Failed to mount image: %w", err)
