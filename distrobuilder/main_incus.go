@@ -413,19 +413,28 @@ func (c *cmdIncus) run(cmd *cobra.Command, args []string, overlayDir string) err
 				Target: filepath.Join("/", "dev", filepath.Base(vm.getRootfsDevFile())),
 				Flags:  unix.MS_BIND,
 			},
-			{
+		}
+
+		// Bind-mount the UEFI/PReP partition into the chroot.
+		// For ppc64le this is a raw PReP partition (no filesystem), for
+		// x86_64/aarch64 it is a vfat ESP that also gets mounted at /boot/efi.
+		if vm.getUEFIDevFile() != "" {
+			mounts = append(mounts, shared.ChrootMount{
 				Source: vm.getUEFIDevFile(),
 				Target: filepath.Join("/", "dev", filepath.Base(vm.getUEFIDevFile())),
 				Flags:  unix.MS_BIND,
-			},
-			{
+			})
+		}
+
+		if vm.architecture != incusArch.ARCH_64BIT_POWERPC_LITTLE_ENDIAN && vm.getUEFIDevFile() != "" {
+			mounts = append(mounts, shared.ChrootMount{
 				Source: vm.getUEFIDevFile(),
 				Target: "/boot/efi",
 				FSType: "vfat",
 				Flags:  0,
 				Data:   "",
 				IsDir:  true,
-			},
+			})
 		}
 	}
 
