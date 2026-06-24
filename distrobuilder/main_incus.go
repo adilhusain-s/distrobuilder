@@ -12,6 +12,7 @@ import (
 
 	client "github.com/lxc/incus/v7/client"
 	"github.com/lxc/incus/v7/shared/api"
+	incusArch "github.com/lxc/incus/v7/shared/osarch"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"golang.org/x/sys/unix"
@@ -327,7 +328,12 @@ func (c *cmdIncus) run(cmd *cobra.Command, args []string, overlayDir string) err
 
 		imgFile := filepath.Join(c.global.flagCacheDir, imgFilename)
 
-		vm, err = newVM(c.global.ctx, imgFile, vmDir, c.global.definition.Targets.Incus.VM.Filesystem, c.global.definition.Targets.Incus.VM.Size)
+		archID, err := incusArch.ArchitectureID(c.global.definition.Image.Architecture)
+		if err != nil {
+			return fmt.Errorf("Failed to get architecture ID: %w", err)
+		}
+
+		vm, err = newVM(c.global.ctx, imgFile, vmDir, c.global.definition.Targets.Incus.VM.Filesystem, c.global.definition.Targets.Incus.VM.Size, archID)
 		if err != nil {
 			return fmt.Errorf("Failed to instantiate VM: %w", err)
 		}
